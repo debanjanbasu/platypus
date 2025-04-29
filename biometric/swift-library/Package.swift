@@ -12,12 +12,6 @@ let package = Package(
             type: .static,
             targets: ["swift-library"])
     ],
-    //dependencies: [
-    //    // Dependencies declare other packages that this package depends on.
-    //    .package(
-    //        name: "swift-bridge-generated",
-    //        path: "./Sources/swift-library/generated/SwiftBridgeCore.swift")
-    //],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
