@@ -1,0 +1,28 @@
+[workspace]
+resolver = "3"
+members = ["biometric"]
+
+[workspace.dependencies]
+swift-bridge = "0.1"
+swift-bridge-build = "0.1"
+tokio = { version = "^1", features = ["full"] }
+thiserror = "2"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+nursery = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+string_slice = "deny"
+pedantic = "deny"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Debanjan Basu"]
+description = "Am I a duck, am I a beaver? I'm a platypus!"
+homepage = "https://platypus.github.io"
+documentation = "https://platypus.github.io/docs"
