@@ -4,4 +4,4 @@
 #import "./generated/SwiftBridgeCore.h"
 #import "./generated/rust-calls-swift/rust-calls-swift.h"
 
-#endif BRIDGING_HEADER_H
+#endif //BRIDGING_HEADER_H

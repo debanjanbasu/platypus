@@ -9,6 +9,6 @@ pub mod tests {
 
     #[test]
     fn test_authenticate() {
-        assert!(authenticate("testing..."));
+        assert!(authenticate("Huhuhuhahaha"));
     }
 }

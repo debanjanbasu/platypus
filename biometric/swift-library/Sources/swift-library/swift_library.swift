@@ -10,6 +10,25 @@ func can_check_biometrics() -> Bool {
 }
 
 func authenticate(localized_reason: RustStr) -> Bool {
-    print(localized_reason.toString())
-    return true
+    let context = LAContext()
+    var resultSuccess = false
+    var resultError: Error?
+    let semaphore = DispatchSemaphore(value: 0)
+
+    context.evaluatePolicy(
+        .deviceOwnerAuthentication,
+        localizedReason: localized_reason.toString()
+    ) { success, error in
+        if success {
+            resultSuccess = true
+        } else {
+            resultSuccess = false
+            resultError = error
+        }
+        semaphore.signal()
+    }
+
+    semaphore.wait()
+
+    return resultSuccess
 }
