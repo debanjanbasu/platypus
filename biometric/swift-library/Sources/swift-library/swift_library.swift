@@ -10,6 +10,6 @@ func can_check_biometrics() -> Bool {
 }
 
 func authenticate(localized_reason: RustStr) -> Bool {
-    print(localized_reason)
+    print(localized_reason.toString())
     return true
 }
