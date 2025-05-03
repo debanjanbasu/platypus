@@ -7,13 +7,17 @@ documentation.workspace = true
 edition.workspace = true
 
 [dependencies]
-swift-bridge = { workspace = true }
 tokio = { workspace = true }
+autocxx = { workspace = true }
+cxx = { workspace = true }
 
 [build-dependencies]
+autocxx-build.workspace = true
 tokio.workspace = true
-swift-bridge-build.workspace = true
 thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true

@@ -24,6 +24,14 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "swift-library",
+            swiftSettings: [
+                .unsafeFlags([
+                    "-module-name", "SwiftLibrary",
+                    "-cxx-interoperability-mode=default",
+                    "-emit-clang-header-path", "swift-library.h",
+                    "-Xcc", "-std=c++23",
+                ])
+            ],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
