@@ -1,21 +1,15 @@
+use autocxx::prelude::*; // use all the main autocxx functions
+
 #[cfg(test)]
 mod test;
 
-#[swift_bridge::bridge]
-mod ffi {
-
-    extern "Swift" {
-        fn can_check_biometrics() -> bool;
-    }
-
-    extern "Swift" {
-        fn authenticate(localized_reason: String, result: Box<dyn FnOnce(Result<String, String>)>);
-    }
+include_cpp! {
+    #include "swift-library.h" // your header file name
+    safety!(unsafe) // see details of unsafety policies described in the 'safety' section of the book
+    generate!("SwiftLibrary::can_check_biometrics") // add this line for each function or type you wish to generate
 }
 
-#[must_use = "This has to be used beforehand to check if the device supports biometric authentication."]
+#[must_use]
 pub fn can_check_biometrics() -> bool {
-    ffi::can_check_biometrics()
+    ffi::SwiftLibrary::can_check_biometrics()
 }
-
-// pub async fn authenticate()
