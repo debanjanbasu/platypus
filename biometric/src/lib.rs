@@ -5,27 +5,22 @@ mod test;
 
 include_cpp! {
     #include "swift-library.h" // your header file name
-    // #include "libcxxstdlibshim.h"
-    safety!(unsafe_ffi) // see details of unsafety policies described in the 'safety' section of the book
+    safety!(unsafe) // see details of unsafety policies described in the 'safety' section of the book
     generate!("SwiftLibrary::can_check_biometrics") // add this line for each function or type you wish to generatex
-    // generate!("SwiftLibrary::authenticate")
+    generate!("SwiftLibrary::authenticate")
 }
-
-// #[cxx::bridge(namespace = "SwiftLibrary")]
-// pub mod ffi2 {
-//     unsafe extern "C++" {
-//         include!("swift-library.h");
-//         type basic_string;
-//         fn authenticate(localized_string: UniquePtr<basic_string>) -> bool;
-//     }
-// }
 
 #[must_use]
 pub fn can_check_biometrics() -> bool {
     ffi::SwiftLibrary::can_check_biometrics()
 }
 
-// #[must_use]
-// pub fn authenticate(localized_reason: String) -> bool {
-//     ffi::SwiftLibrary::authenticate(localized_reason.into_cpp())
-// }
+#[must_use]
+pub fn authenticate(localized_reason: &str) -> bool {
+    unsafe {
+        // This is actually safe because we are using a C++ function that is safe
+        // as well as we know that the string would always have a maximum length of 255 characters.
+        #![allow(clippy::cast_possible_truncation)]
+        ffi::SwiftLibrary::authenticate(localized_reason.as_ptr(), localized_reason.len() as u8)
+    }
+}
