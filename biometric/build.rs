@@ -22,10 +22,27 @@ async fn main() -> Result<()> {
     // --- Autocxx build for C++/Rust bindings ---
     let include_path_swift = PathBuf::from("swift-library");
     let include_path_rust = PathBuf::from("src");
-    Builder::new("src/lib.rs", [&include_path_rust, &include_path_swift])
-        .build()?
-        .flag_if_supported("-std=c++23")
-        .compile("biometric"); // Arbitrary library name
+    let swift_library_paths: Vec<PathBuf> = get_swift_target_info()
+        .await?
+        .paths
+        .runtime_library_paths
+        .iter()
+        .map(PathBuf::from)
+        .collect();
+
+    // Combine static include paths and Swift runtime paths into a single slice
+    let include_paths: Vec<&PathBuf> = vec![&include_path_rust, &include_path_swift]
+        .into_iter()
+        .chain(swift_library_paths.iter())
+        .collect();
+
+    Builder::new(
+        "src/lib.rs",
+        include_paths, // Pass the combined slice
+    )
+    .build()?
+    .flag_if_supported("-std=c++23")
+    .compile("biometric"); // Arbitrary library name
 
     Ok(())
 }

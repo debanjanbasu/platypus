@@ -71,8 +71,7 @@ checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 [[package]]
 name = "autocxx"
 version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ae6bbbec65d053b6fd803a4d63d21d0bd4a92f84f917847f216fec8bb8ae6ae"
+source = "git+https://github.com/google/autocxx.git?branch=main#ca48925c04ae84cc3c61153fa230db9c899fcb53"
 dependencies = [
  "aquamarine",
  "autocxx-macro",
@@ -102,8 +101,7 @@ dependencies = [
 [[package]]
 name = "autocxx-build"
 version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b16fa879472d80dc40ca826a59347772b3f15e69a7a74df41c4935942f62cf30"
+source = "git+https://github.com/google/autocxx.git?branch=main#ca48925c04ae84cc3c61153fa230db9c899fcb53"
 dependencies = [
  "autocxx-engine",
  "env_logger",
@@ -114,8 +112,7 @@ dependencies = [
 [[package]]
 name = "autocxx-engine"
 version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9866b109f7091a3470a49906d35c7f34597828be8885508e9395d1194f8283ca"
+source = "git+https://github.com/google/autocxx.git?branch=main#ca48925c04ae84cc3c61153fa230db9c899fcb53"
 dependencies = [
  "aquamarine",
  "autocxx-bindgen",
@@ -144,8 +141,7 @@ dependencies = [
 [[package]]
 name = "autocxx-macro"
 version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c26712d744702e6fe61fdc618cc107a581a009ec8bfaffc67707d82501dbd907"
+source = "git+https://github.com/google/autocxx.git?branch=main#ca48925c04ae84cc3c61153fa230db9c899fcb53"
 dependencies = [
  "autocxx-parser",
  "proc-macro-error",
@@ -157,8 +153,7 @@ dependencies = [
 [[package]]
 name = "autocxx-parser"
 version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bcfc473ec409e612fb0e0c5c4a1b5b7611eca2bac71bc27b3cda98f15a25124"
+source = "git+https://github.com/google/autocxx.git?branch=main#ca48925c04ae84cc3c61153fa230db9c899fcb53"
 dependencies = [
  "indexmap",
  "itertools 0.10.5",

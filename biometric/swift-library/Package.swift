@@ -30,7 +30,8 @@ let package = Package(
                     "-cxx-interoperability-mode=default",
                     "-emit-clang-header-path", "swift-library.h",
                     "-Xcc", "-std=c++23",
-                ])
+                ]),
+                .interoperabilityMode(.Cxx),
             ],
             linkerSettings: [
                 .unsafeFlags([
