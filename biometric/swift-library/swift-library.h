@@ -4153,6 +4153,7 @@ namespace _impl {
 extern "C" {
 #endif
 
+SWIFT_EXTERN bool $s12SwiftLibrary12authenticate16localized_reasonSbSo3stdO3__1O0088basic_stringCCharstd__1char_traitsCCharstd__1allocatorCChar_cyHBywaEDexaCidvdFCgAayGjzaaV_tF(const void * _Nonnull localized_reason) SWIFT_NOEXCEPT SWIFT_CALL; // authenticate(localized_reason:)
 SWIFT_EXTERN bool $s12SwiftLibrary20can_check_biometricsSbyF(void) SWIFT_NOEXCEPT SWIFT_CALL; // can_check_biometrics()
 
 #ifdef __cplusplus
@@ -4162,6 +4163,39 @@ SWIFT_EXTERN bool $s12SwiftLibrary20can_check_biometricsSbyF(void) SWIFT_NOEXCEP
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreserved-identifier"
 namespace SwiftLibrary SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("SwiftLibrary") {
+
+} // end namespace 
+
+namespace swift SWIFT_PRIVATE_ATTR {
+namespace _impl {
+
+// Type metadata accessor for string
+SWIFT_EXTERN swift::_impl::MetadataResponseTy $sSo3stdO3__1O0088basic_stringCCharstd__1char_traitsCCharstd__1allocatorCChar_cyHBywaEDexaCidvdFCgAayGjzaaVMa(swift::_impl::MetadataRequestTy) SWIFT_NOEXCEPT SWIFT_CALL;
+
+
+} // namespace _impl
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+template<>
+inline const constexpr bool isUsableInGenericContext<std::__1::string> = true;
+template<>
+struct TypeMetadataTrait<std::__1::string> {
+  static SWIFT_INLINE_PRIVATE_HELPER void * _Nonnull getTypeMetadata() {
+    return _impl::$sSo3stdO3__1O0088basic_stringCCharstd__1char_traitsCCharstd__1allocatorCChar_cyHBywaEDexaCidvdFCgAayGjzaaVMa(0)._0;
+  }
+};
+namespace _impl{
+template<>
+inline const constexpr bool isSwiftBridgedCxxRecord<std::__1::string> = true;
+} // namespace
+#pragma clang diagnostic pop
+} // namespace swift
+
+namespace SwiftLibrary SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("SwiftLibrary") {
+SWIFT_INLINE_THUNK bool authenticate(const std::__1::basic_string<char, std::char_traits<char>, std::allocator<char>>& localized_reason) noexcept SWIFT_SYMBOL("s:12SwiftLibrary12authenticate16localized_reasonSbSo3stdO3__1O0088basic_stringCCharstd__1char_traitsCCharstd__1allocatorCChar_cyHBywaEDexaCidvdFCgAayGjzaaV_tF") SWIFT_WARN_UNUSED_RESULT {
+  return SwiftLibrary::_impl::$s12SwiftLibrary12authenticate16localized_reasonSbSo3stdO3__1O0088basic_stringCCharstd__1char_traitsCCharstd__1allocatorCChar_cyHBywaEDexaCidvdFCgAayGjzaaV_tF(swift::_impl::getOpaquePointer(localized_reason));
+}
 
 SWIFT_INLINE_THUNK bool can_check_biometrics() noexcept SWIFT_SYMBOL("s:12SwiftLibrary20can_check_biometricsSbyF") SWIFT_WARN_UNUSED_RESULT {
   return SwiftLibrary::_impl::$s12SwiftLibrary20can_check_biometricsSbyF();

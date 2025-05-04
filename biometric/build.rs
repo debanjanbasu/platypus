@@ -7,20 +7,10 @@ use tokio::process::Command;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Rerun conditions
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=swift-library/swift-library.h");
-    println!("cargo:rerun-if-changed=swift-library/Sources/swift-library/swift_library.swift");
+    // Rerun conditions - whole directory
+    println!("cargo:rerun-if-changed=src");
+    println!("cargo:rerun-if-changed=swift-library");
     println!("cargo:rerun-if-changed=build.rs"); // Rerun if build script changes
-
-    // --- Autocxx build for C++/Rust bindings ---
-    let include_path_swift = PathBuf::from("swift-library");
-    let include_path_rust = PathBuf::from("src");
-
-    Builder::new("src/lib.rs", [&include_path_rust, &include_path_swift])
-        .build()?
-        .flag_if_supported("-std=c++23")
-        .compile("biometric"); // Arbitrary library name
 
     // --- Swift Integration ---
     // Add Swift runtime library search paths
@@ -28,6 +18,14 @@ async fn main() -> Result<()> {
 
     // Compile the Swift package and link the static library
     build_and_link_swift_package("swift-library", "swift-library").await?;
+
+    // --- Autocxx build for C++/Rust bindings ---
+    let include_path_swift = PathBuf::from("swift-library");
+    let include_path_rust = PathBuf::from("src");
+    Builder::new("src/lib.rs", [&include_path_rust, &include_path_swift])
+        .build()?
+        .flag_if_supported("-std=c++23")
+        .compile("biometric"); // Arbitrary library name
 
     Ok(())
 }
