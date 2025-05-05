@@ -13,23 +13,31 @@ let package = Package(
         .visionOS(.v1),
     ],
     products: [
+        .library(name: "cxx-library", targets: ["cxx-library"]),
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "swift-library",
             type: .static,
-            targets: ["swift-library"])
+            targets: ["swift-library"]),
     ],
     targets: [
+        .target(
+            name: "cxx-library",
+        ),
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "swift-library",
+            dependencies: ["cxx-library"],
             swiftSettings: [
                 .unsafeFlags([
                     "-module-name", "SwiftLibrary",
                     "-cxx-interoperability-mode=default",
+                    "-I", "../target/cxxbridge",
                     "-emit-clang-header-path", "swift-library.h",
                     "-Xcc", "-std=c++23",
+                    // For better performance - we really don't need for Swift to check for runtime exclusivity
+                    "-enforce-exclusivity=none",
                 ]),
                 .interoperabilityMode(.Cxx),
             ],
@@ -40,6 +48,6 @@ let package = Package(
                     "-Xlinker", "__info_plist",
                     "-Xlinker", "Resources/Info.plist",
                 ])
-            ])
+            ]),
     ],
 )

@@ -1,26 +1,54 @@
-use autocxx::prelude::*;
+use cxx::let_cxx_string;
+use futures::channel::oneshot;
 
 #[cfg(test)]
 mod test;
 
-include_cpp! {
-    #include "swift-library.h" // your header file name
-    safety!(unsafe) // see details of unsafety policies described in the 'safety' section of the book
-    generate!("SwiftLibrary::can_check_biometrics") // add this line for each function or type you wish to generatex
-    generate!("SwiftLibrary::authenticate")
+#[cxx::bridge(namespace = SwiftLibrary)]
+mod ffi {
+    extern "Rust" {
+        type DoThingContext;
+    }
+    unsafe extern "C++" {
+        include!("swift-library.h");
+        fn can_check_biometrics() -> bool;
+        fn authenticate(localized_reason: &CxxString) -> bool;
+        fn authenticate_with_callback(
+            localized_reason: &CxxString,
+            done: fn(Box<DoThingContext>, ret: bool),
+            ctx: Box<DoThingContext>,
+        );
+    }
+}
+
+struct DoThingContext(oneshot::Sender<bool>);
+
+#[must_use]
+pub async fn authentica_with_callback(arg: &str) -> bool {
+    let (tx, rx) = oneshot::channel();
+    let context = Box::new(DoThingContext(tx));
+    // This is needed to allocate the c++ string on the heap safely
+    let_cxx_string!(stack_pinnned_localized_reason = localized_reason);
+
+    ffi::authenticate_with_callback(
+        &stack_pinnned_localized_reason,
+        |context, ret| {
+            let _ = context.0.send(ret);
+        },
+        context,
+    );
+
+    rx.await.unwrap_or_default()
 }
 
 #[must_use]
 pub fn can_check_biometrics() -> bool {
-    ffi::SwiftLibrary::can_check_biometrics()
+    ffi::can_check_biometrics()
 }
 
 #[must_use]
 pub fn authenticate(localized_reason: &str) -> bool {
-    unsafe {
-        // This is actually safe because we are using a C++ function that is safe
-        // as well as we know that the string would always have a maximum length of 255 characters.
-        #![allow(clippy::cast_possible_truncation)]
-        ffi::SwiftLibrary::authenticate(localized_reason.as_ptr(), localized_reason.len() as u8)
-    }
+    // This is needed to allocate the c++ string on the heap safely
+    let_cxx_string!(stack_pinnned_localized_reason = localized_reason);
+    ffi::authenticate(&stack_pinnned_localized_reason)
 }

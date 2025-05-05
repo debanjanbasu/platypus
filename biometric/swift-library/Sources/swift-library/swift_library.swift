@@ -9,13 +9,7 @@ public func can_check_biometrics() -> Bool {
         .deviceOwnerAuthenticationWithBiometrics, error: &error)
 }
 
-public func authenticate(localized_reason: UnsafePointer<UInt8>, localized_reason_len: UInt8)
-    -> Bool
-{
-    let notice_localized_reason = String(
-        data: Data(
-            buffer: UnsafeBufferPointer(start: localized_reason, count: Int(localized_reason_len))),
-        encoding: .utf8)!
-    print(notice_localized_reason)
+public func authenticate(localized_reason: std.string) -> Bool {
+    print(String(localized_reason))
     return true
 }

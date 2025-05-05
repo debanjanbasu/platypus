@@ -1,5 +1,4 @@
 use anyhow::{Result, anyhow};
-use autocxx_build::Builder;
 use serde::Deserialize;
 use std::env;
 use std::path::PathBuf;
@@ -19,7 +18,7 @@ async fn main() -> Result<()> {
     // Compile the Swift package and link the static library
     build_and_link_swift_package("swift-library", "swift-library").await?;
 
-    // --- Autocxx build for C++/Rust bindings ---
+    // --- CXX build for C++/Rust bindings ---
     let include_path_swift = PathBuf::from("swift-library");
     let include_path_rust = PathBuf::from("src");
     let swift_library_paths: Vec<PathBuf> = get_swift_target_info()
@@ -36,11 +35,10 @@ async fn main() -> Result<()> {
         .chain(swift_library_paths.iter())
         .collect();
 
-    Builder::new(
-        "src/lib.rs",
-        include_paths, // Pass the combined slice
+    cxx_build::bridge(
+        "src/lib.rs", // Pass the combined slice
     )
-    .build()?
+    .includes(include_paths)
     .flag_if_supported("-std=c++23")
     .compile("biometric"); // Arbitrary library name
 

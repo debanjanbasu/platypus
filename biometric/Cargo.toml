@@ -8,11 +8,11 @@ edition.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
-autocxx = { workspace = true }
 cxx = { workspace = true }
+futures = { workspace = true }
 
 [build-dependencies]
-autocxx-build.workspace = true
+cxx-build.workspace = true
 tokio.workspace = true
 thiserror.workspace = true
 serde.workspace = true
