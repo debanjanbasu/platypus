@@ -1,6 +1,8 @@
+import CxxStdlib
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 import LocalAuthentication
+import cxxLibrary
 
 public func can_check_biometrics() -> Bool {
     let context = LAContext()

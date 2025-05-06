@@ -13,7 +13,7 @@ let package = Package(
         .visionOS(.v1),
     ],
     products: [
-        .library(name: "cxx-library", targets: ["cxx-library"]),
+        .library(name: "cxxLibrary", targets: ["cxxLibrary"]),
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "swift-library",
@@ -22,18 +22,22 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "cxx-library",
+            name: "cxxLibrary",
+            cxxSettings: [
+                .unsafeFlags([
+                    "-I", "../target/",
+                ])
+            ]
         ),
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "swift-library",
-            dependencies: ["cxx-library"],
+            dependencies: ["cxxLibrary"],
             swiftSettings: [
                 .unsafeFlags([
                     "-module-name", "SwiftLibrary",
                     "-cxx-interoperability-mode=default",
-                    "-I", "../target/cxxbridge",
                     "-emit-clang-header-path", "swift-library.h",
                     "-Xcc", "-std=c++23",
                     // For better performance - we really don't need for Swift to check for runtime exclusivity
