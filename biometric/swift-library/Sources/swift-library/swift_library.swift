@@ -9,6 +9,7 @@ public func can_check_biometrics() -> Bool {
         .deviceOwnerAuthenticationWithBiometrics, error: &error)
 }
 
-public func authenticate(localized_reason: std.string) -> Bool {
+public func authenticate(localized_reason: RustStr) -> Bool {
+    print(localized_reason)
     return true
 }

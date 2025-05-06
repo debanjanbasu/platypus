@@ -1,31 +1,51 @@
-use autocxx::prelude::*;
-
 #[cfg(test)]
 mod test;
 
-include_cpp! {
-    #include "swift-library.h" // your header file name
-    // #include "libcxxstdlibshim.h"
-    safety!(unsafe_ffi) // see details of unsafety policies described in the 'safety' section of the book
-    generate!("SwiftLibrary::can_check_biometrics") // add this line for each function or type you wish to generatex
-    // generate!("SwiftLibrary::authenticate")
-}
-
-// #[cxx::bridge(namespace = "SwiftLibrary")]
-// pub mod ffi2 {
+// #[cxx::bridge(namespace = SwiftLibrary)]
+// mod ffi {
+//     extern "Rust" {
+//         type DoThingContext;
+//     }
 //     unsafe extern "C++" {
 //         include!("swift-library.h");
-//         type basic_string;
-//         fn authenticate(localized_string: UniquePtr<basic_string>) -> bool;
+//         fn can_check_biometrics() -> bool;
+//         fn authenticate(localized_reason: &CxxString) -> bool;
+//         fn authenticate_with_callback(
+//             localized_reason: &CxxString,
+//             callback: fn(Box<DoThingContext>, ret: bool),
+//             ctx: Box<DoThingContext>,
+//         );
 //     }
 // }
 
-#[must_use]
-pub fn can_check_biometrics() -> bool {
-    ffi::SwiftLibrary::can_check_biometrics()
-}
+// struct DoThingContext(oneshot::Sender<bool>);
 
 // #[must_use]
-// pub fn authenticate(localized_reason: String) -> bool {
-//     ffi::SwiftLibrary::authenticate(localized_reason.into_cpp())
+// pub async fn authenticate_with_callback(localized_reason: &str) -> bool {
+//     let (tx, rx) = oneshot::channel();
+//     let context = Box::new(DoThingContext(tx));
+//     // This is needed to allocate the c++ string on the heap safely
+//     let_cxx_string!(stack_pinnned_localized_reason = localized_reason);
+
+//     ffi::authenticate_with_callback(
+//         &stack_pinnned_localized_reason,
+//         |context, ret| {
+//             let _ = context.0.send(ret);
+//         },
+//         context,
+//     );
+
+//     rx.await.unwrap_or_default()
+// }
+
+// #[must_use]
+// pub fn can_check_biometrics() -> bool {
+//     ffi::can_check_biometrics()
+// }
+
+// #[must_use]
+// pub fn authenticate(localized_reason: &str) -> bool {
+//     // This is needed to allocate the c++ string on the heap safely
+//     let_cxx_string!(stack_pinnned_localized_reason = localized_reason);
+//     ffi::authenticate(&stack_pinnned_localized_reason)
 // }
