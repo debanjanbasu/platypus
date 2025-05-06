@@ -19,28 +19,8 @@ async fn main() -> Result<()> {
     build_and_link_swift_package("swift-library", "swift-library").await?;
 
     // --- CXX build for C++/Rust bindings ---
-    let include_path_swift = PathBuf::from("swift-library");
-    let include_path_rust = PathBuf::from("src");
-    let swift_library_paths: Vec<PathBuf> = get_swift_target_info()
-        .await?
-        .paths
-        .runtime_library_paths
-        .iter()
-        .map(PathBuf::from)
-        .collect();
-
-    // Combine static include paths and Swift runtime paths into a single slice
-    let include_paths: Vec<&PathBuf> = vec![&include_path_rust, &include_path_swift]
-        .into_iter()
-        .chain(swift_library_paths.iter())
-        .collect();
-
-    cxx_build::bridge(
-        "src/lib.rs", // Pass the combined slice
-    )
-    .includes(include_paths)
-    .flag_if_supported("-std=c++23")
-    .compile("biometric"); // Arbitrary library name
+    swift_bridge_build::parse_bridges(["src/lib.rs"])
+        .write_all_concatenated("swift-library/generated", "biometric");
 
     Ok(())
 }

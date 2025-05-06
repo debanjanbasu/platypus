@@ -1,8 +1,6 @@
-import CxxStdlib
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 import LocalAuthentication
-import cxxLibrary
 
 public func can_check_biometrics() -> Bool {
     let context = LAContext()
@@ -11,7 +9,7 @@ public func can_check_biometrics() -> Bool {
         .deviceOwnerAuthenticationWithBiometrics, error: &error)
 }
 
-public func authenticate(localized_reason: std.string) -> Bool {
-    print(String(localized_reason))
+public func authenticate(localized_reason: RustStr) -> Bool {
+    print(localized_reason)
     return true
 }

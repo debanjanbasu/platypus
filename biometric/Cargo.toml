@@ -8,11 +8,10 @@ edition.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
-cxx = { workspace = true }
-futures = { workspace = true }
+swift-bridge = { workspace = true }
 
 [build-dependencies]
-cxx-build.workspace = true
+swift-bridge-build.workspace = true
 tokio.workspace = true
 thiserror.workspace = true
 serde.workspace = true
