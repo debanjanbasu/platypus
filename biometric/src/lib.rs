@@ -1,6 +1,17 @@
 #[cfg(test)]
 mod test;
 
+#[swift_bridge::bridge]
+mod ffi {
+    extern "Swift" {
+        fn can_check_biometrics() -> bool;
+        fn authenticate(
+            localized_reason: String,
+            callback: Box<dyn FnOnce(Result<String, String>)>,
+        );
+    }
+}
+
 // #[cxx::bridge(namespace = SwiftLibrary)]
 // mod ffi {
 //     extern "Rust" {
@@ -38,10 +49,10 @@ mod test;
 //     rx.await.unwrap_or_default()
 // }
 
-// #[must_use]
-// pub fn can_check_biometrics() -> bool {
-//     ffi::can_check_biometrics()
-// }
+#[must_use = "Need to ensure that biometric capabilities are present before doing anything else."]
+pub fn can_check_biometrics() -> bool {
+    ffi::can_check_biometrics()
+}
 
 // #[must_use]
 // pub fn authenticate(localized_reason: &str) -> bool {
