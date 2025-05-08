@@ -5,8 +5,12 @@ members = ["biometric"]
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
 thiserror = "2"
-swift-bridge = { version = "0", features = ["async"] }
-swift-bridge-build = "0"
+# swift-bridge = { git = "https://github.com/debanjanbasu/swift-bridge.git", branch = "master", features = [
+#     "async",
+# ] }
+# swift-bridge-build = { git = "https://github.com/debanjanbasu/swift-bridge.git", branch = "master" }
+swift-bridge = { path = "../swift-bridge", features = ["async"] }
+swift-bridge-build = { path = "../swift-bridge/crates/swift-bridge-build" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1"

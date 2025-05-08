@@ -3,14 +3,19 @@ mod test;
 
 #[swift_bridge::bridge]
 mod ffi {
+    extern "Rust" {
+        #[swift_bridge(Sendable)]
+        type CallBackType;
+    }
     extern "Swift" {
+        #[swift_bridge(Sendable)]
+        type CallBackType;
         fn can_check_biometrics() -> bool;
-        fn authenticate(
-            localized_reason: String,
-            callback: Box<dyn FnOnce(Result<String, String>)>,
-        );
+        fn authenticate(localized_reason: &str, callback: CallBackType);
     }
 }
+
+struct CallBackType(Box<dyn FnOnce(Result<String, String>)>);
 
 // #[cxx::bridge(namespace = SwiftLibrary)]
 // mod ffi {

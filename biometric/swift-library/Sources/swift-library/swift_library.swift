@@ -10,19 +10,16 @@ func can_check_biometrics() -> Bool {
 }
 
 func authenticate(
-    localized_reason: String,
+    localized_reason: RustStr,
     callback: @escaping @Sendable (RustResult<String, String>) -> Void
 ) {
-    // Fix 1: Ensure localized_reason is a Swift String *before* capturing in the Task.
-    let reason = localized_reason
+    // Convert the RustString to a Swift String outside the Task.
+    // String is Sendable, so it can be safely captured by the Task.
+    let reasonText = localized_reason.toString()
 
-    // Fix 3: Mark the 'callback' parameter as @escaping and @Sendable.
-    // @escaping is required because the callback is captured by the Task and called asynchronously.
-    // @Sendable is required because the callback is captured by the @Sendable Task closure.
-    // The caller must guarantee that the provided callback is safe to call from a
-    // concurrent context (i.e., it's @Sendable or correctly handles thread safety).
-
-    Task {  // This Task closure is @Sendable
+    Task {
+        // The Task closure now captures 'reasonText' (a String) and 'callback' (marked @Sendable).
+        // Both are Sendable, so the closure itself becomes Sendable, satisfying Task's requirements.
         let context = LAContext()
 
         do {
@@ -31,7 +28,7 @@ func authenticate(
             // If authentication fails (user enters wrong passcode, fails fingerprint scan),
             // it returns 'false' without throwing.
             let success = try await context.evaluatePolicy(
-                .deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
+                .deviceOwnerAuthenticationWithBiometrics, localizedReason: reasonText)  // Use the captured Sendable String
 
             // Call the callback with the result.
             // Since callback is marked @Sendable, it is safe to call here within the Task.
