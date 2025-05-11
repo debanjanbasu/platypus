@@ -9,6 +9,7 @@ edition.workspace = true
 [dependencies]
 tokio = { workspace = true }
 swift-bridge = { workspace = true }
+thiserror = { workspace = true }
 
 [build-dependencies]
 swift-bridge-build.workspace = true

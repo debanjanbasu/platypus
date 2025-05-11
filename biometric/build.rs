@@ -1,158 +1,194 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
+use serde::Deserialize;
 use std::{env, path::PathBuf};
 use tokio::process::Command;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Rerun conditions - whole directory
+    // Rerun conditions
     println!("cargo:rerun-if-changed=src");
     println!("cargo:rerun-if-changed=swift-library");
     println!("cargo:rerun-if-changed=build.rs"); // Rerun if build script changes
 
+    // 0. Get Swift target info once, as it's needed by multiple steps.
+    let swift_target_info = get_swift_target_info().await?;
+
     // 1. Use `swift-bridge-build` to generate Swift/C FFI glue.
-    //    You can also use the `swift-bridge` CLI.
     swift_bridge_build::parse_bridges(["src/lib.rs"])
-        .write_all_concatenated(swift_bridge_out_dir()?, "biometric");
+        .write_all_concatenated(swift_bridge_out_dir()?, env!("CARGO_PKG_NAME"));
 
     // 2. Compile Swift library
-    compile_swift().await?;
+    link_swift_package("swift-library", "swift-library/", &swift_target_info).await?;
 
-    // 3. Link to Swift library
-    println!("cargo:rustc-link-lib=static=swift-library");
-    println!(
-        "cargo:rustc-link-search={}",
-        &swift_library_static_lib_dir()?.display()
-    );
-
-    // This fix is for macOS only
-    #[cfg(target_os = "macos")]
-    {
-        // Without this we will get warnings about not being able to find dynamic libraries, and then
-        // we won't be able to compile since the Swift static libraries depend on them:
-        // For example:
-        // ld: warning: Could not find or use auto-linked library 'swiftCompatibility51'
-        // ld: warning: Could not find or use auto-linked library 'swiftCompatibility50'
-        // ld: warning: Could not find or use auto-linked library 'swiftCompatibilityDynamicReplacements'
-        // ld: warning: Could not find or use auto-linked library 'swiftCompatibilityConcurrency'
-        let xcode_path = if let Ok(output) = std::process::Command::new("xcode-select")
-            .arg("--print-path")
-            .output()
-        {
-            String::from_utf8(output.stdout.as_slice().into())?
-                .trim()
-                .to_string()
-        } else {
-            "/Applications/Xcode.app/Contents/Developer".to_string()
-        };
-        println!(
-            "cargo:rustc-link-search={}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/",
-            &xcode_path
-        );
-        println!("cargo:rustc-link-search=/usr/lib/swift");
-    }
-
-    // This fix is for Linux only
-    #[cfg(target_os = "linux")]
-    {
-        // We need to tell cargo which additional libraries to link to!
-        //
-        // This is required because swift build -Xswiftc -static-stdlib works for executables,
-        // but not for libraries (yet). Thus, when trying to link against the produced .a file,
-        // not all symbols can be resolved. The undefined symbols can easily be found by running
-        // `nm -u .build/debug/libswift-library.a`, usually things such as `swift_retain`
-        // and `swift_release` will be missing.
-        // Cargo will give you an error message like this if symbols are missing:
-        // note: /usr/bin/ld: .build/debug/libswift-library.a(swift_library.swift.o): in function `$ss27_finalizeUninitializedArrayySayxGABnlF':
-        //       <compiler-generated>:(.text+0x17): undefined reference to `$sSaMa'
-        // or:                                      undefined reference to `swift_release'
-        //
-        // Thus, we need to explicitly link against the Swift libraries which are required.
-        // Unfortunately, the required linker flags depend on the Swift version and the used modules,
-        // so they might be different for your project.
-        let swift_lib_path = std::env::var("SWIFT_LIBRARY_PATH")
-            .unwrap_or_else(|_| "/usr/lib/swift/linux".to_string());
-
-        if !std::path::Path::new(&swift_lib_path).exists() {
-            panic!(
-                "Swift library path not found at /usr/lib/swift/linux and SWIFT_LIBRARY_PATH environment variable not set"
-            );
-        }
-
-        println!("cargo:rustc-link-search={}", swift_lib_path);
-
-        // These swift libraries are needed to get all the missing symbols to properly
-        // link the Swift library. This is required for `cargo run` as well as `cargo test`.
-        println!("cargo:rustc-link-lib=swiftCore");
-        println!("cargo:rustc-link-lib=stdc++");
-        println!("cargo:rustc-link-lib=swiftSwiftOnoneSupport");
-    }
+    // 3. Link Swift runtime libraries
+    link_swift(&swift_target_info)?;
 
     Ok(())
-}
-
-async fn compile_swift() -> Result<()> {
-    let swift_package_dir = manifest_dir()?.join("swift-library");
-
-    let mut cmd = Command::new("swift");
-
-    cmd.current_dir(swift_package_dir).arg("build").args([
-        "-Xswiftc",
-        "-import-objc-header",
-        "-Xswiftc",
-        &swift_source_dir()?
-            .join("bridging-header.h")
-            .display()
-            .to_string(), // Use display().to_string() to avoid unwrap on Option
-    ]);
-
-    if is_release_build() {
-        cmd.args(["-c", "release"]); // Removed needless borrow
-    }
-
-    let child = cmd.spawn()?;
-
-    let exit_status = child.wait_with_output().await?;
-
-    assert!(
-        exit_status.status.success(),
-        r"
-Stderr: {}
-Stdout: {}
-",
-        String::from_utf8_lossy(&exit_status.stderr).into_owned(), // Use lossy conversion to avoid unwrap on Result
-        String::from_utf8_lossy(&exit_status.stdout).into_owned(), // Use lossy conversion to avoid unwrap on Result
-    );
-
-    Ok(())
-}
-
-fn swift_bridge_out_dir() -> Result<PathBuf> {
-    generated_code_dir()
 }
 
 fn manifest_dir() -> Result<PathBuf> {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    Ok(PathBuf::from(manifest_dir))
+    Ok(PathBuf::from(env::var("CARGO_MANIFEST_DIR")?))
 }
 
-fn is_release_build() -> bool {
-    std::env::var("PROFILE").unwrap_or_default() == "release"
+fn swift_bridge_out_dir() -> Result<PathBuf> {
+    Ok(manifest_dir()?
+        .join("swift-library/Sources/swift-library")
+        .join("generated"))
 }
 
-fn swift_source_dir() -> Result<PathBuf> {
-    Ok(manifest_dir()?.join("swift-library/Sources/swift-library"))
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SwiftTargetInfo {
+    pub unversioned_triple: String,
+    #[serde(rename = "librariesRequireRPath")]
+    pub libraries_require_rpath: bool,
 }
 
-fn generated_code_dir() -> Result<PathBuf> {
-    Ok(swift_source_dir()?.join("generated"))
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SwiftPaths {
+    pub runtime_library_paths: Vec<String>,
+    #[allow(dead_code)] // Potentially useful for future extensions
+    pub runtime_resource_path: String,
 }
 
-fn swift_library_static_lib_dir() -> Result<PathBuf> {
-    let debug_or_release = if is_release_build() {
-        "release"
-    } else {
-        "debug"
-    };
+#[derive(Debug, Deserialize)]
+pub struct SwiftTarget {
+    pub target: SwiftTargetInfo,
+    pub paths: SwiftPaths,
+}
 
-    Ok(manifest_dir()?.join(format!("swift-library/.build/{debug_or_release}")))
+/// Retrieves Swift target information by executing `swift -print-target-info`.
+///
+/// This function spawns a `swift` process with the `-print-target-info` argument,
+/// captures its standard output, and then attempts to parse this output as JSON
+/// into a `SwiftTarget` struct.
+///
+/// # Errors
+///
+/// This function will return an error in the following situations:
+/// - If the `swift` command cannot be executed (e.g., it's not found in the system's PATH,
+///   or there are permission issues).
+/// - If the `swift -print-target-info` command executes but returns a non-zero exit code.
+/// - If the standard output of the `swift` command is not valid UTF-8.
+/// - If the standard output of the `swift` command is not valid JSON, or if it cannot be
+///   deserialized into the `SwiftTarget` struct.
+pub async fn get_swift_target_info() -> Result<SwiftTarget> {
+    let output = Command::new("swift")
+        .args(["-print-target-info"])
+        .output()
+        .await?;
+
+    if !output.status.success() {
+        return Err(anyhow!(
+            "Failed to execute 'swift -print-target-info'. Exit status: {}. Stderr: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    serde_json::from_slice(&output.stdout).map_err(|e| {
+        anyhow!(
+            "Failed to parse JSON from 'swift -print-target-info': Raw output: {}\nError: {}",
+            String::from_utf8_lossy(&output.stdout),
+            e
+        )
+    })
+}
+
+/// Links the Swift runtime libraries.
+///
+/// This function uses pre-fetched Swift target information and, if the target does not
+/// require `RPath` for its libraries, it instructs cargo to search for Swift runtime
+/// libraries in the paths specified by `swift -print-target-info`.
+///
+/// # Arguments
+///
+/// * `swift_target_info`: Pre-fetched Swift target information.
+///
+/// # Errors
+///
+/// This function will return an error if `swift_target_info.target.libraries_require_rpath`
+/// is true, indicating that the Swift libraries require `RPath`. This typically means the
+/// deployment target (e.g., minimum macOS version) needs to be adjusted.
+pub fn link_swift(swift_target_info: &SwiftTarget) -> Result<()> {
+    if swift_target_info.target.libraries_require_rpath {
+        return Err(anyhow!(
+            "Libraries require RPath! Change minimum MacOS value to fix (e.g., in Package.swift or project settings)."
+        ));
+    }
+
+    for path in &swift_target_info.paths.runtime_library_paths {
+        println!("cargo:rustc-link-search=native={path}");
+    }
+    Ok(())
+}
+
+/// Compiles a Swift package and links it to the Rust project.
+///
+/// This function performs the following steps:
+/// 1. Determines the build profile (e.g., "debug" or "release") from the `PROFILE` environment variable.
+/// 2. Executes `swift build` for the specified package and profile.
+/// 3. Uses pre-fetched Swift target information to construct the path to the compiled Swift static library.
+/// 4. Instructs cargo to link against this static library and search in its directory.
+///
+/// # Arguments
+///
+/// * `package_name`: The name of the Swift package (e.g., "`MySwiftLib`"). This is used to form the library name `lib<package_name>.a`.
+/// * `package_root`: The path to the root directory of the Swift package, relative to the manifest directory.
+/// * `swift_target_info`: Pre-fetched Swift target information.
+///
+/// # Errors
+///
+/// This function will return an error in the following situations:
+/// - If the `PROFILE` environment variable is not set.
+/// - If the `swift build` command fails to execute (e.g., `swift` not found, permission issues).
+/// - If the `swift build` command executes but returns a non-zero exit code (compilation failure).
+pub async fn link_swift_package(
+    package_name: &str,
+    package_root: &str,
+    swift_target_info: &SwiftTarget,
+) -> Result<()> {
+    let profile = env::var("PROFILE")?;
+
+    let output = Command::new("swift")
+        .args(["build", "-c", &profile])
+        .current_dir(manifest_dir()?.join(package_root)) // Ensure current_dir is relative to manifest
+        .output()
+        .await?;
+
+    if !output.status.success() {
+        return Err(anyhow!(
+            "Failed to compile Swift package '{}' in directory '{}'.\n\
+             Command: `swift build -c {}` (run in {})\n\
+             Status: {}\n\
+             Stdout:\n{}\n\
+             Stderr:\n{}",
+            package_name,
+            package_root,
+            profile,
+            manifest_dir()?.join(package_root).display(),
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    // Construct the path to the directory containing the compiled Swift static library.
+    // This path is relative to the package_root.
+    // e.g., <package_root>/.build/<target_triple>/<profile>/
+    let lib_search_subdir = PathBuf::from(".build")
+        .join(&swift_target_info.target.unversioned_triple)
+        .join(&profile);
+
+    // The full path for cargo to search is manifest_dir / package_root / lib_search_subdir
+    let full_lib_search_path = manifest_dir()?.join(package_root).join(lib_search_subdir);
+
+    println!(
+        "cargo:rustc-link-search=native={}",
+        full_lib_search_path.display()
+    );
+    println!("cargo:rustc-link-lib=static={package_name}");
+
+    Ok(())
 }

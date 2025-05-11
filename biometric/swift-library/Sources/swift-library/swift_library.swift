@@ -10,8 +10,7 @@ func can_check_biometrics() -> Bool {
 }
 
 func authenticate(
-    localized_reason: RustStr,
-    callback: @escaping @Sendable (RustResult<String, String>) -> Void
+    localized_reason: RustStr
 ) {
     // Convert the RustString to a Swift String outside the Task.
     // String is Sendable, so it can be safely captured by the Task.
@@ -33,18 +32,18 @@ func authenticate(
             // Call the callback with the result.
             // Since callback is marked @Sendable, it is safe to call here within the Task.
             if success {
-                callback(.Ok("true"))
+                _ = try await authentication_done_callback(true, "")
             } else {
                 // Authentication failed (e.g., user denied or failed to match)
                 // The async version returns false but doesn't provide an error object for simple failure=false.
                 // We provide a generic message consistent with the original structure.
-                callback(.Err("Authentication failed"))
+                _ = try await authentication_done_callback(false, "Authentication failed")
             }
         } catch {
             // Handle errors thrown by evaluatePolicy (e.g., user cancelled, policy not available, etc.)
             let nsError = error as NSError  // LAError is an NSError subclass
             let errorMessage = nsError.localizedDescription
-            callback(.Err(errorMessage))
+            _ = try await authentication_done_callback(false, errorMessage)
         }
     }
 }

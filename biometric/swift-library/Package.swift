@@ -25,13 +25,13 @@ let package = Package(
         .target(
             name: "swift-library",
             swiftSettings: [
-                //.interoperabilityMode(.C),
+                .interoperabilityMode(.C),
                 .unsafeFlags([
                     // For better performance - we really don't need for Swift to check for runtime exclusivity
                     "-enforce-exclusivity=none",
                     "-import-objc-header",
-                    "./Sources/swift-library/bridging-header.h",
-                ])
+                    "Sources/swift-library/bridging-header.h",
+                ]),
             ],
             linkerSettings: [
                 .unsafeFlags([
