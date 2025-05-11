@@ -7,7 +7,7 @@ let package = Package(
     name: "swift-library",
     platforms: [
         .iOS(.v12),
-        .macOS(.v10_15),  // Had to be upgraded to use Task
+        .macOS(.v12),  // Had to be upgraded to use Task, and Concurrency
         .watchOS(.v7),
         .macCatalyst(.v13),
         .visionOS(.v1),
