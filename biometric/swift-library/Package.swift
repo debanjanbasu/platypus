@@ -7,7 +7,7 @@ let package = Package(
     name: "swift-library",
     platforms: [
         .iOS(.v12),
-        .macOS(.v12),  // Had to be upgraded to use Task, and Concurrency
+        .macOS(.v10_15),  // Had to be upgraded to use Task, and LAContext
         .watchOS(.v7),
         .macCatalyst(.v13),
         .visionOS(.v1),
@@ -25,6 +25,7 @@ let package = Package(
         .target(
             name: "swift-library",
             swiftSettings: [
+                .swiftLanguageMode(.v6),
                 .interoperabilityMode(.C),
                 .unsafeFlags([
                     // For better performance - we really don't need for Swift to check for runtime exclusivity

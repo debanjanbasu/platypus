@@ -1,35 +1,33 @@
-public func authentication_done_callback<GenericIntoRustString: IntoRustString>(_ authenticated: Bool, _ error: GenericIntoRustString) async throws -> Bool {
-    func onComplete(cbWrapperPtr: UnsafeMutableRawPointer?, rustFnRetVal: __swift_bridge__$ResultBoolAndString) {
-        let wrapper = Unmanaged<CbWrapper$authentication_done_callback>.fromOpaque(cbWrapperPtr!).takeRetainedValue()
-        switch rustFnRetVal.tag { case __swift_bridge__$ResultBoolAndString$ResultOk: wrapper.cb(.success(rustFnRetVal.payload.ok)) case __swift_bridge__$ResultBoolAndString$ResultErr: wrapper.cb(.failure(RustString(ptr: rustFnRetVal.payload.err))) default: fatalError() }
-    }
-
-    return try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<Bool, Error>) in
-        let callback = { rustFnRetVal in
-            continuation.resume(with: rustFnRetVal)
-        }
-
-        let wrapper = CbWrapper$authentication_done_callback(cb: callback)
-        let wrapperPtr = Unmanaged.passRetained(wrapper).toOpaque()
-
-        __swift_bridge__$authentication_done_callback(wrapperPtr, onComplete, authenticated, { let rustString = error.intoRustString(); rustString.isOwned = false; return rustString.ptr }())
-    })
-}
-class CbWrapper$authentication_done_callback {
-    var cb: (Result<Bool, Error>) -> ()
-
-    public init(cb: @escaping (Result<Bool, Error>) -> ()) {
-        self.cb = cb
-    }
-}
 @_cdecl("__swift_bridge__$can_check_biometrics")
 func __swift_bridge__can_check_biometrics () -> Bool {
     can_check_biometrics()
 }
 
-@_cdecl("__swift_bridge__$authenticate")
-func __swift_bridge__authenticate (_ localized_reason: RustStr) {
-    authenticate(localized_reason: localized_reason)
+@_cdecl("__swift_bridge__$authenticate_with_callback")
+func __swift_bridge__authenticate_with_callback (_ localized_reason: RustStr, _ callback: UnsafeMutableRawPointer) {
+    { let cb1 = __private__RustFnOnceCallback$authenticate_with_callback$param1(ptr: callback); let _ = authenticate_with_callback(localized_reason: localized_reason, callback: { arg0 in cb1.call(arg0) }) }()
+}
+class __private__RustFnOnceCallback$authenticate_with_callback$param1: @unchecked Sendable {
+    var ptr: UnsafeMutableRawPointer
+    var called = false
+
+    init(ptr: UnsafeMutableRawPointer) {
+        self.ptr = ptr
+    }
+
+    deinit {
+        if !called {
+            __swift_bridge__$authenticate_with_callback$_free$param1(ptr)
+        }
+    }
+
+    func call<GenericIntoRustString: IntoRustString>(_ arg0: RustResult<GenericIntoRustString, GenericIntoRustString>) {
+        if called {
+            fatalError("Cannot call a Rust FnOnce function twice")
+        }
+        called = true
+        return __swift_bridge__$authenticate_with_callback$param1(ptr, { switch arg0 { case .Ok(let ok): return __private__ResultPtrAndPtr(is_ok: true, ok_or_err: { let rustString = ok.intoRustString(); rustString.isOwned = false; return rustString.ptr }()) case .Err(let err): return __private__ResultPtrAndPtr(is_ok: false, ok_or_err: { let rustString = err.intoRustString(); rustString.isOwned = false; return rustString.ptr }()) } }())
+    }
 }
 
 

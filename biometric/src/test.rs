@@ -9,6 +9,10 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_authenticate() {
-        assert!(authenticate("Test").await.unwrap_or_default());
+        assert!(
+            authenticate("use your device's biometrics for trust store")
+                .await
+                .unwrap_or_default()
+        );
     }
 }

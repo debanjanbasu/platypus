@@ -9,41 +9,35 @@ func can_check_biometrics() -> Bool {
         .deviceOwnerAuthenticationWithBiometrics, error: &error)
 }
 
-func authenticate(
-    localized_reason: RustStr
+func authenticate_with_callback(
+    localized_reason: RustStr,
+    callback: @escaping @Sendable (RustResult<String, String>) -> Void  // Mark callback as escaping and Sendable
 ) {
     // Convert the RustString to a Swift String outside the Task.
     // String is Sendable, so it can be safely captured by the Task.
     let reasonText = localized_reason.toString()
 
     Task {
-        // The Task closure now captures 'reasonText' (a String) and 'callback' (marked @Sendable).
-        // Both are Sendable, so the closure itself becomes Sendable, satisfying Task's requirements.
         let context = LAContext()
 
         do {
-            // Use the async/await version of evaluatePolicy, available from iOS 16.
-            // This method throws errors like LAError.userCancel, LAError.biometryNotAvailable, etc.
-            // If authentication fails (user enters wrong passcode, fails fingerprint scan),
-            // it returns 'false' without throwing.
             let success = try await context.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics, localizedReason: reasonText)  // Use the captured Sendable String
 
-            // Call the callback with the result.
-            // Since callback is marked @Sendable, it is safe to call here within the Task.
             if success {
-                _ = try await authentication_done_callback(true, "")
+                callback(.Ok("true"))
             } else {
-                // Authentication failed (e.g., user denied or failed to match)
-                // The async version returns false but doesn't provide an error object for simple failure=false.
-                // We provide a generic message consistent with the original structure.
-                _ = try await authentication_done_callback(false, "Authentication failed")
+                // Even if authentication fails (e.g., user cancels), it's not an *error* in policy evaluation.
+                // The API returns `false` for `success`. We report this as Ok(false).
+                callback(.Ok("false"))
             }
         } catch {
-            // Handle errors thrown by evaluatePolicy (e.g., user cancelled, policy not available, etc.)
-            let nsError = error as NSError  // LAError is an NSError subclass
-            let errorMessage = nsError.localizedDescription
-            _ = try await authentication_done_callback(false, errorMessage)
+            // Handle actual errors during policy evaluation (e.g., biometrics not available/enrolled).
+            let nsError = error as NSError  // LAError conforms to NSError
+            // Provide a more specific error description if possible
+            let laError = error as? LAError
+            let errorDescription = laError?.localizedDescription ?? nsError.localizedDescription
+            callback(.Err(errorDescription))
         }
     }
 }
