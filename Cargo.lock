@@ -331,6 +331,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge"
 version = "0.1.57"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
 dependencies = [
  "once_cell",
  "swift-bridge-build",
@@ -341,6 +342,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-build"
 version = "0.1.57"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
 dependencies = [
  "proc-macro2",
  "swift-bridge-ir",
@@ -351,6 +353,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-ir"
 version = "0.1.57"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -360,6 +363,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-macro"
 version = "0.1.57"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -391,9 +395,9 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.19.1"
+version = "3.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7437ac7763b9b123ccf33c338a5cc1bac6f69b45a136c19bdd8a65e3916435bf"
+checksum = "e8a64e3985349f2441a1a9ef0b853f869006c3855f2cda6862a94d26ebb9d6a1"
 dependencies = [
  "fastrand",
  "getrandom",
