@@ -70,24 +70,22 @@ fn swift_bridge_out_dir() -> Result<PathBuf> {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SwiftTargetInfo {
-    pub unversioned_triple: String,
+struct SwiftTargetInfo {
+    unversioned_triple: String,
     #[serde(rename = "librariesRequireRPath")]
-    pub libraries_require_rpath: bool,
+    libraries_require_rpath: bool,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SwiftPaths {
-    pub runtime_library_paths: Vec<String>,
-    #[allow(dead_code)] // Potentially useful for future extensions
-    pub runtime_resource_path: String,
+struct SwiftPaths {
+    runtime_library_paths: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SwiftTarget {
-    pub target: SwiftTargetInfo,
-    pub paths: SwiftPaths,
+struct SwiftTarget {
+    target: SwiftTargetInfo,
+    paths: SwiftPaths,
 }
 
 /// Retrieves Swift target information by executing `swift -print-target-info`.
@@ -105,7 +103,7 @@ pub struct SwiftTarget {
 /// - If the standard output of the `swift` command is not valid UTF-8.
 /// - If the standard output of the `swift` command is not valid JSON, or if it cannot be
 ///   deserialized into the `SwiftTarget` struct.
-pub async fn get_swift_target_info() -> Result<SwiftTarget> {
+async fn get_swift_target_info() -> Result<SwiftTarget> {
     let output = Command::new("swift")
         .args(["-print-target-info"])
         .output()
@@ -143,7 +141,7 @@ pub async fn get_swift_target_info() -> Result<SwiftTarget> {
 /// This function will return an error if `swift_target_info.target.libraries_require_rpath`
 /// is true, indicating that the Swift libraries require `RPath`. This typically means the
 /// deployment target (e.g., minimum macOS version) needs to be adjusted.
-pub fn link_swift(swift_target_info: &SwiftTarget) -> Result<()> {
+fn link_swift(swift_target_info: &SwiftTarget) -> Result<()> {
     if swift_target_info.target.libraries_require_rpath {
         return Err(anyhow!(
             "Libraries require RPath! Change minimum MacOS value to fix (e.g., in Package.swift or project settings)."
@@ -176,7 +174,7 @@ pub fn link_swift(swift_target_info: &SwiftTarget) -> Result<()> {
 /// - If the `PROFILE` environment variable is not set.
 /// - If the `swift build` command fails to execute (e.g., `swift` not found, permission issues).
 /// - If the `swift build` command executes but returns a non-zero exit code (compilation failure).
-pub async fn link_swift_package(
+async fn link_swift_package(
     package_name: &str,
     package_root: &str,
     swift_target_info: &SwiftTarget,
