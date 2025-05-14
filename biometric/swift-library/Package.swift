@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "swift-library",
     platforms: [
-        .iOS(.v12),
+        .iOS(.v13),  // Upgraded to support init(priority:operation:)
         .macOS(.v10_15),  // Had to be upgraded to use Task, and LAContext
         .watchOS(.v7),
         .macCatalyst(.v13),
