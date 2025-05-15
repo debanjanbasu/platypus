@@ -2,8 +2,14 @@
 resolver = "3"
 members = ["biometric"]
 
+# dependencies that are shared across packages
 [workspace.dependencies]
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", default-features = false, features = [
+    "sync",
+    "macros",
+    "rt-multi-thread",
+    "process",
+] }
 thiserror = "2"
 swift-bridge = { git = "https://github.com/debanjanbasu/swift-bridge.git", branch = "master", features = [
     "async",
@@ -16,7 +22,7 @@ serde_json = "1"
 anyhow = "1"
 
 [workspace.lints.rust]
-unsafe_code = "allow"
+unsafe_code = "deny"
 
 [workspace.lints.clippy]
 nursery = "deny"
@@ -30,6 +36,27 @@ pedantic = "deny"
 version = "0.1.0"
 edition = "2024"
 authors = ["Debanjan Basu"]
-description = "Am I a duck, am I a beaver? I'm a platypus!"
+description = "Am I a duck, am I a beaver, am I an otter, am I a rat? I'm a platypus!"
 homepage = "https://platypus.github.io"
 documentation = "https://platypus.github.io/docs"
+keywords = [
+    "platypus",
+    "ios",
+    "macosx",
+    "visionos",
+    "catalyst",
+    "tvos",
+    "watchos",
+    "apple",
+    "linux",
+    "windows",
+    "android",
+    "swift",
+    "rust",
+    "native",
+    "bridge",
+    "async",
+    "library",
+    "cross",
+    "platform",
+]

@@ -5,6 +5,7 @@ authors.workspace = true
 description.workspace = true
 documentation.workspace = true
 edition.workspace = true
+homepage.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
@@ -19,11 +20,5 @@ serde.workspace = true
 serde_json.workspace = true
 anyhow.workspace = true
 
-[dev-dependencies]
-tokio.workspace = true
-
 [lints]
 workspace = true
-
-[lib]
-crate-type = ["lib"]
