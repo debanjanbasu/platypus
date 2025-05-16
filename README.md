@@ -1,24 +1,22 @@
+<img src="images/platypus.svg" alt="Platypus Logo" width="320" height="320">
+
+
 # What am I?
-iOS isn't going anywhere near Rust rather trying to copy elements to Swift, Android is too much of Kotlin, Windows lives in a world of C++, and Linux lives in a world of C. As a developer I need to work with all of them, but have nowhere to turn. To make your pain a little bit less, I'm taking a bit more pain, but providing a standard library allowing you to have cross-platform pure-Rust libraries to use. My name is platypus, and I don't know who I am, but I do know I look like have a bill like a duck, body like a beaver, fur like and otter, and fast like a wild rat? I try to bring the fastest performance, with the simplest implementation to all crustaceans so they can interact with actual physical and native elements on a device.
-
-
+Ah, the joys of modern native development! You've got iOS whispering Swift, Android chatting in Kotlin, Windows holding forth in C++, and Linux keeping it real with C. As a developer trying to serve them all, it can feel like you're constantly context-switching just to say "hello world" natively. We felt that pain too. So, we decided to embrace the madness (so you don't have to!) by creating Platypus: a pure-Rust library designed to provide a standard, cross-platform way to interact with native device features. Think of Platypus, the animal – a fascinating creature, a bit of a mashup, right? That's us! We're bringing together the seemingly disparate worlds of native APIs under one efficient, Rusty roof. Our goal is to deliver the fastest possible performance with the simplest API for accessing native elements, bridging the gaps between these platform islands.
 
 # Prerequisites
-First install the Xcode, Visual Studio Tools, etc. Beyond ths scope of explanation. This repo isn't for the faint of the heart, as it's a complex project that requires a very good understanding of Swift, Rust, Windosw, wasm, web-sys, etc.
+First things first: you'll need the usual native development toolchains installed, such as Xcode, Visual Studio Tools, and the like. Detailing the installation steps for *all* of those would be a documentation project in itself, so we'll assume you've conquered those beasts before. Consider this project a slightly more advanced challenge; it helps to have a good grasp of Swift, Rust, the unique joys of Windows development, WASM, web-sys, and potentially a strong cup of coffee nearby.
 
 Hope one day, we get true Rust compatibility with these vendors, till then, we do with whatever we've got in our arsenal.
 
-# Description
-This library provides a unified interface to access native functionalities across all Apple, Android, Windows, and Linux targets. It leverages Rust workspaces to encapsulate platform-specific implementations. It's bridged with Swift for a seamless developer experience for all Apple targets.
-
-Below is a table outlining the current workspaces/crates and the work being done to support them:
+# Status Updates
+Behold! A mystical table detailing the current state of our various components (or 'crates', if you're fancy) and the ongoing battle to make them play nicely with every operating system imaginable:
 
 | Crate      | macOS | iOS | watchOS | macCatalyst | visionOS | Android | Windows | Linux | WASM |
 |------------|-------|-----|---------|-------------|----------|---------|---------|-------|------|
 | biometrics | ✅    | ✅  | ✅      | ✅          | ✅       | ⏳      | ⏳      | ⏳    | ⏳   |
 | Version    | v10.15+ | v13+ | v7+     | v13+        | v1+      |         |         |       |      |
 
-This structure allows for modular development and clear separation of concerns based on the underlying native APIs being accessed.
 
 # Contributing
 ## Create a generic swift-library when needed inside your package
@@ -30,7 +28,7 @@ rm -rf .git*
 ```
 
 # build.rs
-Most of the items are taken care by the build.rs. However, one important file that needs to be taken care of is bridging-header.h. This file is used to bridge the Swift and Rust code together. For the time being, just copy-paste it to the root of swift-library.
+Our `build.rs` script is a marvel of automation... mostly. But when it comes to `bridging-header.h`, the sacred text that lets Swift and Rust actually talk to each other without awkward silences, you'll need to play human courier. Simply copy-paste it to the root of `swift-library`. Think of it as the final boss battle.
 
 # Running
 The simplest way is just do:
