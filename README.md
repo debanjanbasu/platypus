@@ -1,9 +1,14 @@
+# What am I?
+iOS isn't going anywhere near Rust rather trying to copy elements to Swift, Android is too much of Kotlin, Windows lives in a world of C++, and Linux lives in a world of C. As a developer I need to work with all of them, but have nowhere to turn. To make your pain a little bit less, I'm taking a bit more pain, but providing a standard library allowing you to have cross-platform pure-Rust libraries to use. My name is platypus, and I don't know who I am, but I do know I look like have a bill like a duck, body like a beaver, fur like and otter, and fast like a wild rat? I try to bring the fastest performance, with the simplest implementation to all crustaceans so they can interact with actual physical and native elements on a device.
+
+
+
 # Prerequisites
 First install the Xcode, Visual Studio Tools, etc. Beyond ths scope of explanation. This repo isn't for the faint of the heart, as it's a complex project that requires a very good understanding of Swift, Rust, Windosw, wasm, web-sys, etc.
 
 Hope one day, we get true Rust compatibility with these vendors, till then, we do with whatever we've got in our arsenal.
 
-# Package Description
+# Description
 This library provides a unified interface to access native functionalities across all Apple, Android, Windows, and Linux targets. It leverages Rust workspaces to encapsulate platform-specific implementations. It's bridged with Swift for a seamless developer experience for all Apple targets.
 
 Below is a table outlining the current workspaces/crates and the work being done to support them:
