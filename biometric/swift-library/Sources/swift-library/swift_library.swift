@@ -6,7 +6,7 @@ func can_check_biometrics() -> Bool {
     let context = LAContext()
     var error: NSError?
     return context.canEvaluatePolicy(
-        .deviceOwnerAuthenticationWithBiometrics, error: &error)
+        .deviceOwnerAuthentication, error: &error)
 }
 
 func authenticate_with_callback(
@@ -22,7 +22,7 @@ func authenticate_with_callback(
 
         do {
             let success = try await context.evaluatePolicy(
-                .deviceOwnerAuthenticationWithBiometrics, localizedReason: reasonText)  // Use the captured Sendable String
+                .deviceOwnerAuthentication, localizedReason: reasonText)  // Use the captured Sendable String
 
             if success {
                 callback(.Ok("true"))
