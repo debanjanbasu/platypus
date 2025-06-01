@@ -8,13 +8,34 @@ edition.workspace = true
 homepage.workspace = true
 
 [dependencies]
-tokio = { workspace = true }
 swift-bridge = { workspace = true }
 thiserror = { workspace = true }
 
+# Dependencies for anything other than wasm
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true, default-features = false, features = [
+    "sync",
+    "macros",
+    "io-util",
+    "rt-multi-thread",
+] } # Tokio with 'rt-multi-threaded' for others
+
+# Dependencies for wasm
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+tokio = { workspace = true, default-features = false, features = [
+    "sync",
+    "macros",
+    "io-util",
+    "rt",
+] } # Tokio with 'rt' for wasm32
+
 [build-dependencies]
 swift-bridge-build.workspace = true
-tokio.workspace = true
+tokio = { workspace = true, default-features = false, features = [
+    "process",
+    "macros",
+    "rt-multi-thread",
+] }
 thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true

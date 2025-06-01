@@ -5,6 +5,7 @@ build-std-features = ["panic_immediate_abort"]
 [build]
 rustflags = [
     "-Clto",
+    "-Cembed-bitcode=yes",
     "-Clinker-plugin-lto",
     "-Zdylib-lto",
     "-Zlinker-features=+lld",
@@ -12,6 +13,7 @@ rustflags = [
     "-Zlocation-detail=none",
     "--cfg",
     "tokio_unstable",
+    "-Zwasm-c-abi=spec",
 ]
 
 # [profile.dev]
@@ -25,6 +27,21 @@ codegen-units = 1
 # panic = "abort"
 strip = true
 incremental = false
+
+# Try to enable all the features for wasm32-unknown-unknown
+# Use the following command to find the target-features
+# rustc --target=wasm32-unknown-unknown --print=target-features
+# [target.wasm32-unknown-unknown]
+# rustflags = [
+#     "-C",
+#     # wide-arithmetic is not supported by wasm-bindgen as of yet - as it's support rust stable, not nightly
+#     # Cannot use +atomics as they are not supported by veilid yet - These require COEP, i.e. websocket connection to only the same domain
+#     # "target-feature=+atomics,+bulk-memory,+crt-static,+exception-handling,+extended-const,+multivalue,+mutable-globals,+nontrapping-fptoint,+reference-types,+relaxed-simd,+sign-ext,+simd128,+tail-call,+wide-arithmetic",
+#     "target-feature=+bulk-memory,+crt-static,+exception-handling,+extended-const,+multivalue,+mutable-globals,+nontrapping-fptoint,+reference-types,+relaxed-simd,+sign-ext,+simd128,+tail-call",
+#     "-C",
+#     "panic=abort",
+#     "-Zwasm-c-abi=spec",
+# ]
 
 [target.aarch64-apple-darwin]
 rustflags = [

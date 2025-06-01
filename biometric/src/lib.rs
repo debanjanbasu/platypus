@@ -25,6 +25,13 @@ mod ffi {
 }
 
 #[must_use = "Need to ensure that biometric capabilities are present before doing anything else."]
+#[cfg(target_arch = "wasm32")]
+pub fn can_check_biometrics() -> bool {
+    false
+}
+
+#[must_use = "Need to ensure that biometric capabilities are present before doing anything else."]
+#[cfg(not(target_arch = "wasm32"))]
 pub fn can_check_biometrics() -> bool {
     ffi::can_check_biometrics()
 }
@@ -55,6 +62,7 @@ pub fn can_check_biometrics() -> bool {
 /// * `BiometricError::NativeAuthFailed`: If the native authentication process itself reported
 ///   an error (e.g., system error, configuration issue). The contained `String` provides
 ///   details from the native side.
+#[cfg(not(target_arch = "wasm32"))]
 pub async fn authenticate(localized_reason: &str) -> Result<bool, BiometricError> {
     // The receiver needs to handle Result<bool, String> where String is the potential error from Swift
     let (tx, rx) = oneshot::channel::<Result<bool, String>>();

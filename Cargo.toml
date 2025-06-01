@@ -4,12 +4,7 @@ members = ["biometric"]
 
 # dependencies that are shared across packages
 [workspace.dependencies]
-tokio = { version = "1", default-features = false, features = [
-    "sync",
-    "macros",
-    "rt-multi-thread",
-    "process",
-] }
+tokio = { version = "1", default-features = false }
 thiserror = "2"
 swift-bridge = { git = "https://github.com/debanjanbasu/swift-bridge.git", branch = "master", features = [
     "async",
