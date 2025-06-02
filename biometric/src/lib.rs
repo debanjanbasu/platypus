@@ -24,7 +24,7 @@ pub enum BiometricError {
     NativeAuthFailed(String),
 }
 
-#[async_trait(?Send)]
+#[async_trait]
 pub trait BiometricService: Send + Sync {
     fn can_check(&self) -> bool;
     async fn authenticate(&self, localized_reason: &str) -> Result<bool, BiometricError>;
@@ -46,11 +46,12 @@ mod ffi {
 #[cfg(target_vendor = "apple")]
 mod native {
     use super::{BiometricError, BiometricService};
+    use async_trait::async_trait;
     use tokio::sync::oneshot;
 
     pub struct NativeBiometricService;
 
-    #[async_trait::async_trait(?Send)]
+    #[async_trait]
     impl BiometricService for NativeBiometricService {
         fn can_check(&self) -> bool {
             super::ffi::can_check_biometrics()
@@ -76,10 +77,11 @@ mod native {
 #[cfg(target_arch = "wasm32")]
 mod wasm {
     use super::{BiometricError, BiometricService};
+    use async_trait::async_trait;
 
     pub struct WasmBiometricService;
 
-    #[async_trait::async_trait(?Send)]
+    #[async_trait]
     impl BiometricService for WasmBiometricService {
         fn can_check(&self) -> bool {
             false
