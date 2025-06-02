@@ -24,6 +24,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 
 [[package]]
+name = "async-trait"
+version = "0.1.88"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e539d3fca749fcee5236ab05e93a52867dd549cc157c8cb7f99595f3cedffdb5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -43,6 +54,7 @@ name = "biometric"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "serde",
  "serde_json",
  "swift-bridge",
@@ -261,7 +273,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge"
 version = "0.1.57"
-source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#ec5a31d70cc04305e119e8822b48969fd09bb657"
 dependencies = [
  "once_cell",
  "swift-bridge-build",
@@ -272,7 +284,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-build"
 version = "0.1.57"
-source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#ec5a31d70cc04305e119e8822b48969fd09bb657"
 dependencies = [
  "proc-macro2",
  "swift-bridge-ir",
@@ -283,7 +295,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-ir"
 version = "0.1.57"
-source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#ec5a31d70cc04305e119e8822b48969fd09bb657"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -293,7 +305,7 @@ dependencies = [
 [[package]]
 name = "swift-bridge-macro"
 version = "0.1.57"
-source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#8cdf8d4c37e2b7f7c289aac2c56a719982437efa"
+source = "git+https://github.com/debanjanbasu/swift-bridge.git?branch=master#ec5a31d70cc04305e119e8822b48969fd09bb657"
 dependencies = [
  "proc-macro2",
  "quote",

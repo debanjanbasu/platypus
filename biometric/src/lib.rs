@@ -1,18 +1,34 @@
+use async_trait::async_trait;
 use thiserror::Error;
-use tokio::sync::oneshot::{self, error::RecvError};
+
+#[cfg(target_vendor = "apple")]
+use tokio::sync::oneshot::error::RecvError;
 
 #[cfg(test)]
 mod test;
 
 #[derive(Error, Debug)]
 pub enum BiometricError {
+    /// Indicates that the current platform does not support biometric authentication.
+    #[error("Biometric authentication is not supported on this platform")]
+    UnsupportedPlatform,
+
+    #[cfg(target_vendor = "apple")]
     #[error("Failed to receive authentication status from native layer: {0}")]
     CallbackReceiveError(#[from] RecvError),
 
+    #[cfg(target_vendor = "apple")]
     #[error("Biometric authentication failed on native side: {0}")]
     NativeAuthFailed(String),
 }
 
+#[async_trait(?Send)]
+pub trait BiometricService {
+    fn can_check(&self) -> bool;
+    async fn authenticate(&self, localized_reason: &str) -> Result<bool, BiometricError>;
+}
+
+#[cfg(target_vendor = "apple")]
 #[swift_bridge::bridge]
 mod ffi {
     extern "Swift" {
@@ -24,72 +40,64 @@ mod ffi {
     }
 }
 
-#[must_use = "Need to ensure that biometric capabilities are present before doing anything else."]
+// Native (Apple platforms) implementation
+#[cfg(target_vendor = "apple")]
+mod native {
+    use super::{BiometricError, BiometricService};
+    use tokio::sync::oneshot;
+
+    pub struct NativeBiometricService;
+
+    #[async_trait::async_trait(?Send)]
+    impl BiometricService for NativeBiometricService {
+        fn can_check(&self) -> bool {
+            super::ffi::can_check_biometrics()
+        }
+
+        async fn authenticate(&self, localized_reason: &str) -> Result<bool, BiometricError> {
+            let (tx, rx) = oneshot::channel();
+
+            super::ffi::authenticate_with_callback(
+                localized_reason,
+                Box::new(move |result: Result<String, String>| {
+                    let _ = tx.send(result.map(|s| s == "true"));
+                }),
+            );
+
+            rx.await
+                .map_err(BiometricError::CallbackReceiveError)?
+                .map_err(BiometricError::NativeAuthFailed)
+        }
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
-pub fn can_check_biometrics() -> bool {
-    false
+mod wasm {
+    use super::{BiometricError, BiometricService};
+
+    pub struct WasmBiometricService;
+
+    #[async_trait::async_trait(?Send)]
+    impl BiometricService for WasmBiometricService {
+        fn can_check(&self) -> bool {
+            false
+        }
+
+        async fn authenticate(&self, _localized_reason: &str) -> Result<bool, BiometricError> {
+            Err(BiometricError::UnsupportedPlatform)
+        }
+    }
 }
 
-#[must_use = "Need to ensure that biometric capabilities are present before doing anything else."]
-#[cfg(not(target_arch = "wasm32"))]
-pub fn can_check_biometrics() -> bool {
-    ffi::can_check_biometrics()
-}
+#[must_use]
+pub fn get_biometric_service() -> Box<dyn BiometricService> {
+    #[cfg(target_vendor = "apple")]
+    {
+        Box::new(native::NativeBiometricService)
+    }
 
-/// Asynchronously performs biometric authentication using the native platform's capabilities.
-///
-/// Presents the user with the native biometric authentication UI (e.g., Face ID, Touch ID).
-/// Waits for the user's interaction and returns the authentication result.
-///
-/// # Arguments
-///
-/// * `localized_reason` - A string explaining why the authentication is needed. This is typically
-///   displayed to the user in the authentication prompt.
-///
-/// # Returns
-///
-/// A `Result` indicating the outcome:
-/// - `Ok(true)` if the authentication was successful.
-/// - `Ok(false)` if the authentication failed (e.g., user cancelled, incorrect biometric).
-/// - `Err(BiometricError)` if an error occurred during the process.
-///
-/// # Errors
-///
-/// This function can return the following errors:
-///
-/// * `BiometricError::CallbackReceiveError`: If there was an issue receiving the authentication
-///   result back from the native layer (e.g., the callback mechanism failed).
-/// * `BiometricError::NativeAuthFailed`: If the native authentication process itself reported
-///   an error (e.g., system error, configuration issue). The contained `String` provides
-///   details from the native side.
-#[cfg(not(target_arch = "wasm32"))]
-pub async fn authenticate(localized_reason: &str) -> Result<bool, BiometricError> {
-    // The receiver needs to handle Result<bool, String> where String is the potential error from Swift
-    let (tx, rx) = oneshot::channel::<Result<bool, String>>();
-
-    // Call into the native Swift function to start the authentication UI
-    ffi::authenticate_with_callback(
-        localized_reason,
-        Box::new(move |result: Result<String, String>| {
-            // Simplify the mapping from Swift's Result<String, String> to Result<bool, String>
-            // If Ok(status_str), map it to Ok(status_str == "true").
-            // If Err(error_string), it remains Err(error_string).
-            let message_to_send = result.map(|status_str| status_str == "true");
-
-            // Send the processed result. Ignore send errors as they are handled by rx.await below.
-            let _ = tx.send(message_to_send);
-        }),
-    );
-
-    // Wait for the callback result.
-    // rx.await returns Result<Result<bool, String>, RecvError>
-    // The outer `?` handles the RecvError, converting it via #[from] in BiometricError::CallbackReceiveError
-    let callback_payload: Result<bool, String> = rx.await?;
-
-    // At this point, callback_payload is Result<bool, String>.
-    // The String is the error message from the Swift side, if one occurred there.
-    // Map the potential error string from Swift into our NativeAuthFailed variant.
-    // If callback_payload is Ok(bool), it remains Ok(bool).
-    // If callback_payload is Err(String), it becomes Err(BiometricError::NativeAuthFailed(String)).
-    callback_payload.map_err(BiometricError::NativeAuthFailed)
+    #[cfg(target_arch = "wasm32")]
+    {
+        Box::new(wasm::WasmBiometricService)
+    }
 }

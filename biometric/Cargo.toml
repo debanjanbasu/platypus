@@ -1,33 +1,23 @@
 [package]
 name = "biometric"
+edition = "2024"
 version.workspace = true
 authors.workspace = true
 description.workspace = true
 documentation.workspace = true
-edition.workspace = true
 homepage.workspace = true
 
 [dependencies]
-swift-bridge = { workspace = true }
+tokio = { workspace = true, default-features = false, features = [
+    "sync",
+    "macros",
+] }
 thiserror = { workspace = true }
+async-trait = { workspace = true }
 
-# Dependencies for anything other than wasm
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { workspace = true, default-features = false, features = [
-    "sync",
-    "macros",
-    "io-util",
-    "rt-multi-thread",
-] } # Tokio with 'rt-multi-threaded' for others
-
-# Dependencies for wasm
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-tokio = { workspace = true, default-features = false, features = [
-    "sync",
-    "macros",
-    "io-util",
-    "rt",
-] } # Tokio with 'rt' for wasm32
+# Dependencies whereing Swift caters for
+[target.'cfg(target_vendor = "apple")'.dependencies]
+swift-bridge = { workspace = true }
 
 [build-dependencies]
 swift-bridge-build.workspace = true
