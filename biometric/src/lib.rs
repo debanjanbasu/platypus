@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use thiserror::Error;
 
@@ -23,7 +25,7 @@ pub enum BiometricError {
 }
 
 #[async_trait(?Send)]
-pub trait BiometricService {
+pub trait BiometricService: Send + Sync {
     fn can_check(&self) -> bool;
     async fn authenticate(&self, localized_reason: &str) -> Result<bool, BiometricError>;
 }
@@ -90,14 +92,14 @@ mod wasm {
 }
 
 #[must_use]
-pub fn get_biometric_service() -> Box<dyn BiometricService> {
+pub fn get_biometric_service() -> Arc<dyn BiometricService> {
     #[cfg(target_vendor = "apple")]
     {
-        Box::new(native::NativeBiometricService)
+        Arc::new(native::NativeBiometricService)
     }
 
     #[cfg(target_arch = "wasm32")]
     {
-        Box::new(wasm::WasmBiometricService)
+        Arc::new(wasm::WasmBiometricService)
     }
 }
