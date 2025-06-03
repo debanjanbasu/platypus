@@ -167,12 +167,10 @@ fn swift_bridge_out_dir() -> Result<PathBuf> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let target_vendor = env::var("CARGO_CFG_TARGET_VENDOR")?;
-
-    // This is required, as somehow cargo is ignoring this
-    println!("cargo:rustc-env=DYLD_FALLBACK_LIBRARY_PATH=/usr/lib/swift");
-
-    if target_vendor == "apple" {
+    #[cfg(target_vendor = "apple")]
+    {
+        // This is required, as somehow cargo is ignoring this
+        println!("cargo:rustc-env=DYLD_FALLBACK_LIBRARY_PATH=/usr/lib/swift");
         // 1. Use `swift-bridge-build` to generate Swift/C FFI glue.
         swift_bridge_build::parse_bridges(["src/lib.rs"])
             .write_all_concatenated(swift_bridge_out_dir()?, env!("CARGO_PKG_NAME"));
