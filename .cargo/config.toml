@@ -42,10 +42,13 @@ rustflags = [
     "-Zwasm-c-abi=spec",
 ]
 
+# Ensure minimum apple M1 support: Use the following command to find the target-features
+# turn on all the SIMD instructions discovered by the following command
+# rustc --print cfg -C target-cpu=apple-m1 | grep feature | cut -d'"' -f2 | sed 's/^/+/' | paste -sd, - | sed 's/^/target-feature=/'
 [target.aarch64-apple-darwin]
 rustflags = [
-    # "-C",
-    # "target-feature=+aes,+crc,+dit,+dotprod,+dpb,+dpb2,+fcma,+fhm,+flagm,+flagm2,+fp16,+frintts,+jsconv,+lor,+lse,+lse2,+neon,+paca,+pacg,+pan,+pmuv3,+ras,+rcpc,+rcpc2,+rdm,+sb,+sha2,+sha3,+ssbs,+v8.1a,+v8.2a,+v8.3a,+v8.4a,+vh",
+    "-C",
+    "target-feature=+aes,+crc,+dit,+dotprod,+dpb,+dpb2,+fcma,+fhm,+flagm,+flagm2,+fp16,+frintts,+jsconv,+lor,+lse,+lse2,+neon,+paca,+pacg,+pan,+pmuv3,+ras,+rcpc,+rcpc2,+rdm,+sb,+sha2,+sha3,+ssbs,+v8.1a,+v8.2a,+v8.3a,+v8.4a,+vh",
     "-C",
     "panic=abort",
     "-Zpanic_abort_tests",
