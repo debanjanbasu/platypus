@@ -40,3 +40,15 @@ To check if it's building:
 ```rust
 cargo build
 ```
+
+# Usage
+For now you can directly link to the libraries:
+```toml
+[dependencies]
+biometric = { git = "https://github.com/debanjanbasu/platypus.git", branch = "main" }
+```
+
+Parent apps don't respect environment variables setup by rustc, so you'll need to add this to your build.rs ideally for apple platforms:
+```rust
+println!("cargo:rustc-env=DYLD_FALLBACK_LIBRARY_PATH=/usr/lib/swift");
+```
