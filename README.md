@@ -50,5 +50,5 @@ biometric = { git = "https://github.com/debanjanbasu/platypus.git", branch = "ma
 
 Parent apps don't respect environment variables setup by rustc, so you'll need to add this to your build.rs ideally for apple platforms:
 ```rust
-println!("cargo:rustc-env=DYLD_FALLBACK_LIBRARY_PATH=/usr/lib/swift");
+println!("cargo:rustc-link-search=native=/usr/lib/swift");
 ```

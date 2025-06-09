@@ -142,9 +142,7 @@ async fn build_swift_library() -> Result<()> {
     // segment often doesn't include the "-simulator" suffix. Use the determined segment.
     let out_path_triple_segment = format!(
         "{}-{}-{}",
-        swift_target_arch,
-        "apple",
-        swift_build_triple_os_suffix
+        swift_target_arch, "apple", swift_build_triple_os_suffix
     );
     println!("cargo:rustc-link-search=native={out_dir}/{out_path_triple_segment}/{profile}");
     // Link the generated Swift library.

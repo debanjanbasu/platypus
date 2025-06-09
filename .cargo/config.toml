@@ -11,6 +11,7 @@ rustflags = [
     "-Zlinker-features=+lld",
     "-Zvirtual-function-elimination",
     "-Zlocation-detail=none",
+    "-Zfmt-debug=none",
     "--cfg",
     "tokio_unstable",
 ]
@@ -26,6 +27,8 @@ codegen-units = 1
 # panic = "abort"
 strip = true
 incremental = false
+debug-assertions = false
+overflow-checks = false
 
 # Try to enable all the features for wasm32-unknown-unknown
 # Use the following command to find the target-features
