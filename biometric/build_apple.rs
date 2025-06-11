@@ -116,24 +116,32 @@ async fn build_swift_library() -> Result<()> {
     let swift_library_dir = PathBuf::from(&manifest_dir).join("swift-library");
 
     // Start compiling the swift code
+    // If profile is "release", add -Xswiftc -whole-module-optimization
+    let mut swift_args = vec![
+        "--sdk",
+        swift_sdk_name, // Use the appropriate target SDK (e.g., iphonesimulator)
+        "env",
+        "-i", // Fairly new bug: https://forums.swift.org/t/swiftpm-bogus-invalid-manifest-error-xcode/78906
+        "swift",
+        "build",
+        "--sdk",
+        &sdk_path,
+        "--triple",
+        &swift_build_triple, // Use the build triple including simulator suffix if applicable
+        "--build-path",
+        &out_dir,
+        "-c",
+        &profile,
+    ];
+
+    if profile == "release" {
+        swift_args.push("-Xswiftc");
+        swift_args.push("-whole-module-optimization");
+    }
+
     run_command(
         "xcrun",
-        &[
-            "--sdk",
-            swift_sdk_name, // Use the appropriate target SDK (e.g., iphonesimulator)
-            "env",
-            "-i", // Fairly new bug: https://forums.swift.org/t/swiftpm-bogus-invalid-manifest-error-xcode/78906
-            "swift",
-            "build",
-            "--sdk",
-            &sdk_path,
-            "--triple",
-            &swift_build_triple, // Use the build triple including simulator suffix if applicable
-            "--build-path",
-            &out_dir,
-            "-c",
-            &profile,
-        ],
+        &swift_args,
         Some(&swift_library_dir), // Pass the working directory
     )
     .await?;

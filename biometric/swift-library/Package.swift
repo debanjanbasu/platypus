@@ -32,6 +32,7 @@ let package = Package(
                     "-enforce-exclusivity=none",
                     "-import-objc-header",
                     "Sources/swift-library/bridging-header.h",
+                    "-O",  // Optimize for performance
                 ]),
             ],
             linkerSettings: [
@@ -40,6 +41,7 @@ let package = Package(
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
                     "-Xlinker", "Resources/Info.plist",
+                    "-Xlinker", "-S",  // Strip unused symbols
                 ])
             ])
     ],
