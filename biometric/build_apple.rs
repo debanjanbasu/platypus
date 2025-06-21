@@ -120,8 +120,6 @@ async fn build_swift_library() -> Result<()> {
     let mut swift_args = vec![
         "--sdk",
         swift_sdk_name, // Use the appropriate target SDK (e.g., iphonesimulator)
-        "env",
-        "-i", // Fairly new bug: https://forums.swift.org/t/swiftpm-bogus-invalid-manifest-error-xcode/78906
         "swift",
         "build",
         "--sdk",
