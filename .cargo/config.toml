@@ -20,11 +20,11 @@ rustflags = [
 # panic = "abort"
 
 [profile.release]
-opt-level = "z"
+opt-level = 3 # Better to optimize for size, but don't turn off loop vectorization
 debug = false
 lto = true
 codegen-units = 1
-# panic = "abort"
+panic = "abort"
 strip = true
 incremental = false
 debug-assertions = false
@@ -36,10 +36,9 @@ overflow-checks = false
 [target.wasm32-unknown-unknown]
 rustflags = [
     "-C",
-    # wide-arithmetic is not supported by wasm-bindgen as of yet - as it's support rust stable, not nightly
     # Cannot use +atomics as they are not supported by veilid yet - These require COEP, i.e. websocket connection to only the same domain
     # "target-feature=+atomics,+bulk-memory,+crt-static,+exception-handling,+extended-const,+multivalue,+mutable-globals,+nontrapping-fptoint,+reference-types,+relaxed-simd,+sign-ext,+simd128,+tail-call,+wide-arithmetic",
-    "target-feature=+bulk-memory,+crt-static,+exception-handling,+extended-const,+multivalue,+mutable-globals,+nontrapping-fptoint,+reference-types,+relaxed-simd,+sign-ext,+simd128,+tail-call",
+    "target-feature=+bulk-memory,+crt-static,+exception-handling,+extended-const,+multivalue,+mutable-globals,+nontrapping-fptoint,+reference-types,+relaxed-simd,+sign-ext,+simd128,+tail-call,+wide-arithmetic",
     "-C",
     "panic=abort",
     "-Zwasm-c-abi=spec",
